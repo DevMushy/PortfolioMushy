@@ -21,8 +21,9 @@
   <div id="container"></div>
   <div class="ui">Mirko Ragusa <br><small>Seleziona un asteroide!</small></div>
 
-</script>
   <script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
