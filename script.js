@@ -153,6 +153,15 @@ function addExtraAsteroids(model) {
         new THREE.SphereGeometry(0.32, 6, 4)
     ];
 
+    // Array di funzioni diverse per ogni meteorite
+    const actions = [
+        () => console.log("Meteorite 1: effetto speciale!"),
+        () => alert("Meteorite 2: hai trovato un bonus!"),
+        () => document.body.style.background = "#222",
+        () => console.log("Meteorite 4: niente di particolare."),
+        () => alert("Meteorite 5: BOOM!")
+    ];
+
     for (let i = 0; i < extraCount; i++) {
         const geom = geometries[i % geometries.length];
         const mat = new THREE.MeshStandardMaterial({
@@ -173,7 +182,9 @@ function addExtraAsteroids(model) {
             orbitRadius: radius,
             orbitAngle: angle,
             orbitSpeed: 0,
-            originalColor: mat.color.clone()
+            originalColor: mat.color.clone(),
+            isCustomMeteorite: true,
+            onClick: actions[i] // funzione specifica per ogni meteorite
         };
 
         model.add(a);
@@ -181,12 +192,17 @@ function addExtraAsteroids(model) {
     }
 }
 
-// === INTERAZIONI ===
 function highlightMesh(mesh) {
     if (!mesh.material || !mesh.userData.originalColor) return;
     const orig = mesh.userData.originalColor;
     mesh.material.color = mesh.material.color.clone();
     mesh.material.color.offsetHSL(0, 0.3, 0.2);
+
+    // Se è un meteorite custom ed ha una funzione onClick, eseguila
+    if (mesh.userData.isCustomMeteorite && typeof mesh.userData.onClick === "function") {
+        mesh.userData.onClick();
+    }
+
     setTimeout(() => {
         if (mesh.material && orig) mesh.material.color.copy(orig);
     }, 600);
