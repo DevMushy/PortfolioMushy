@@ -16,7 +16,7 @@ let lastX = 0, lastY = 0;
 let moved = false;
 let startX = 0, startY = 0;
 
-const autoRotateSpeed = 0.0015;
+const autoRotateSpeed = 0.001;
 
 // === SETUP SCENA ===
 function initScene() {
@@ -155,7 +155,7 @@ function addExtraAsteroids(model) {
 
     // Array di funzioni diverse per ogni meteorite
     const actions = [
-        () => console.log("Meteorite 1: effetto speciale!"),
+        () => GameStart(),
         () => alert("Meteorite 2: hai trovato un bonus!"),
         () => document.body.style.background = "#222",
         () => console.log("Meteorite 4: niente di particolare."),
@@ -198,6 +198,8 @@ function highlightMesh(mesh) {
     mesh.material.color = mesh.material.color.clone();
     mesh.material.color.offsetHSL(0, 0.3, 0.2);
 
+    zoomToMesh(mesh);
+
     // Se è un meteorite custom ed ha una funzione onClick, eseguila
     if (mesh.userData.isCustomMeteorite && typeof mesh.userData.onClick === "function") {
         mesh.userData.onClick();
@@ -207,6 +209,35 @@ function highlightMesh(mesh) {
         if (mesh.material && orig) mesh.material.color.copy(orig);
     }, 600);
 }
+
+let zoomTarget = null;
+let zoomLerp = 0;
+let zoomStartPos = null;
+let zoomEndOffset = new THREE.Vector3(0, 1, 2.5);
+let zoomDuration = 32;
+
+function zoomToMesh(mesh) {
+    zoomTarget = mesh;
+    zoomLerp = 0;
+    zoomStartPos = camera.position.clone();
+}
+
+function updateZoom() {
+    if (zoomTarget) {
+        const targetPos = zoomTarget.getWorldPosition(new THREE.Vector3());
+        const endPos = targetPos.clone().add(zoomEndOffset);
+        if (zoomLerp < 1) {
+            zoomLerp += 1 / zoomDuration;
+            camera.position.lerpVectors(zoomStartPos, endPos, zoomLerp);
+        } else {
+            camera.position.copy(endPos);
+        }
+        camera.lookAt(targetPos);
+    }
+}
+
+// In your animate() function, add:
+// updateZoom(); // <-- Now called inside animate()
 
 function performPick(e) {
     if (!loaded) return;
@@ -270,6 +301,8 @@ function animate() {
             m.rotation.y += 0.01;
         }
     }
+
+    updateZoom();
 
     renderer.render(scene, camera);
     renderer.setAnimationLoop(animate);
