@@ -198,11 +198,12 @@ function highlightMesh(mesh) {
     mesh.material.color = mesh.material.color.clone();
     mesh.material.color.offsetHSL(0, 0.3, 0.2);
 
-    zoomToMesh(mesh);
+
 
     // Se è un meteorite custom ed ha una funzione onClick, eseguila
     if (mesh.userData.isCustomMeteorite && typeof mesh.userData.onClick === "function") {
         mesh.userData.onClick();
+     zoomToMesh(mesh);
     }
 
     setTimeout(() => {
