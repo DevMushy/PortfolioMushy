@@ -76,11 +76,46 @@ function hideLoadingOverlay() {
 
 // === CARICAMENTO MODELLO ===
 function loadModel() {
+
+    const toRemove = [];
+    const asteroidCandidates = [];
+
     const loader = new GLTFLoader();
     loader.load(
         './planet_with_asteroid_belt.glb',
         gltf => {
             model = gltf.scene;
+            if (!window.__loggedGLTFMeshNames) {
+                const names = new Set();
+                gltf.scene.traverse(obj => {
+                    if (obj.isMesh) {
+                        names.add(obj.name || '(senza nome)');
+                        if (obj.name != "Object_4")
+                            asteroidCandidates.push(obj);
+                    }
+                });
+                console.log('Nomi mesh trovati nel GLB:', [...names].sort());
+                window.__loggedGLTFMeshNames = true;
+            }
+
+            const removalRatio = 0.8;
+            const numToRemove = Math.floor(asteroidCandidates.length * removalRatio);
+
+            for (let i = asteroidCandidates.length - 1; i > 0; i--) {
+                const j = Math.random() * (i + 1) | 0;
+                [asteroidCandidates[i], asteroidCandidates[j]] = [asteroidCandidates[j], asteroidCandidates[i]];
+            }
+
+            for (let i = 0; i < numToRemove; i++) {
+                toRemove.push(asteroidCandidates[i]);
+            }
+
+            toRemove.forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+            });
+
+            console.log('Oggetti rimossi:', toRemove.map(o => o.name).sort());
+
             scene.add(model);
 
             centerAndScaleModel(model);
@@ -203,7 +238,7 @@ function highlightMesh(mesh) {
     // Se è un meteorite custom ed ha una funzione onClick, eseguila
     if (mesh.userData.isCustomMeteorite && typeof mesh.userData.onClick === "function") {
         mesh.userData.onClick();
-     zoomToMesh(mesh);
+        zoomToMesh(mesh);
     }
 
     setTimeout(() => {
