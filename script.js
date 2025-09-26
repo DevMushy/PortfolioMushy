@@ -94,7 +94,6 @@ function loadModel() {
                             asteroidCandidates.push(obj);
                     }
                 });
-                console.log('Nomi mesh trovati nel GLB:', [...names].sort());
                 window.__loggedGLTFMeshNames = true;
             }
 
@@ -113,8 +112,6 @@ function loadModel() {
             toRemove.forEach(obj => {
                 if (obj.parent) obj.parent.remove(obj);
             });
-
-            console.log('Oggetti rimossi:', toRemove.map(o => o.name).sort());
 
             scene.add(model);
 
